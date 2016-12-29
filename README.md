@@ -23,7 +23,7 @@ Basic use case with a single nested bucket:
 	// ... open DB ...
 	// we'll specify a path with a "bucket1" bucket nested in a "Misc" root bucket
 	bucket1Path := bucketeer.NewStringPath("Misc", "bucket1")
-	bucket1 := bucketeer.New(db, bucketPath)
+	bucket1 := bucketeer.New(db, bucket1Path)
 	// create the path buckets in the DB if they don't exist
 	bucket1.EnsurePathBuckets()
 	// store some key-value pairs in the "bucket1" bucket
