@@ -5,7 +5,7 @@ A Go package for streamlining use of buckets and encoded values in BoltDB.
 
 The Bucketeer types in this package wrap an already-open *bolt.DB instance to provide their convenience methods. Thus, you can create a Bucketeer instance for every bucket path you want to access, and their transactions will be thread-safe and share the single DB write lock.
 
-This package also provides all of its functionality via stand-alone methods which take *bolt.DB or *bolt.Tx arguments.
+This package also provides most of its functionality via stand-alone methods which take *bolt.DB or *bolt.Tx arguments.
 
 
 ## Status

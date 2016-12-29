@@ -6,42 +6,42 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-type Bucketeer struct {
+type ByteBucketeer struct {
 	db   *bolt.DB
 	path Path
 }
 
-func New(db *bolt.DB, path Path) (bb *Bucketeer) {
-	bb = &Bucketeer{
+func NewByteBucketeer(db *bolt.DB, path Path) (bb *ByteBucketeer) {
+	bb = &ByteBucketeer{
 		db:   db,
 		path: path,
 	}
 	return
 }
 
-func (bb *Bucketeer) EnsurePathBuckets() (err error) {
+func (bb *ByteBucketeer) EnsurePathBuckets() (err error) {
 	err = EnsurePathBuckets(bb.db, bb.path)
 	return
 }
 
-func (bb *Bucketeer) EnsureNestedBucket(bucket []byte) (err error) {
+func (bb *ByteBucketeer) EnsureNestedBucket(bucket []byte) (err error) {
 	err = EnsureNestedBucket(bb.db, bb.path, bucket)
 	return
 }
 
-func (bb *Bucketeer) Put(key []byte, value []byte) error {
+func (bb *ByteBucketeer) Put(key []byte, value []byte) error {
 	return PutByteValue(bb.db, bb.path, key, value)
 }
 
-func (bb *Bucketeer) Get(key []byte) ([]byte, error) {
+func (bb *ByteBucketeer) Get(key []byte) ([]byte, error) {
 	return GetByteValue(bb.db, bb.path, key)
 }
 
-func (bb *Bucketeer) PutNested(bucket []byte, key []byte, value []byte) error {
+func (bb *ByteBucketeer) PutNested(bucket []byte, key []byte, value []byte) error {
 	return PutByteValue(bb.db, bb.path.Nest(bucket), key, value)
 }
 
-func (bb *Bucketeer) GetNested(bucket []byte, key []byte) ([]byte, error) {
+func (bb *ByteBucketeer) GetNested(bucket []byte, key []byte) ([]byte, error) {
 	return GetByteValue(bb.db, bb.path.Nest(bucket), key)
 }
 

@@ -7,45 +7,43 @@ import (
 )
 
 /*
-JsonBucketeer is a convenience struct for storing and retrieving objects which can be marshaled to bytes by json.Marshal and unmarshaled from bytes by json.Unmarshal.
+JsonBucketeer is a convenience type for storing and retrieving objects which can be marshaled to bytes by json.Marshal and unmarshaled from bytes by json.Unmarshal.
 */
 type JsonBucketeer struct {
-	db   *bolt.DB
-	path Path
+	bb *ByteBucketeer
 }
 
 func NewJsonBucketeer(db *bolt.DB, path Path) (jb *JsonBucketeer) {
 	jb = &JsonBucketeer{
-		db:   db,
-		path: path,
+		bb: NewByteBucketeer(db, path),
 	}
 	return
 }
 
 func (jb *JsonBucketeer) EnsurePathBuckets() (err error) {
-	err = EnsurePathBuckets(jb.db, jb.path)
+	err = jb.bb.EnsurePathBuckets()
 	return
 }
 
 func (jb *JsonBucketeer) EnsureNestedBucket(bucket []byte) (err error) {
-	err = EnsureNestedBucket(jb.db, jb.path, bucket)
+	err = jb.bb.EnsureNestedBucket(bucket)
 	return
 }
 
 func (jb *JsonBucketeer) Put(key []byte, obj interface{}) (err error) {
-	return PutJsonValue(jb.db, jb.path, key, obj)
+	return PutJsonValue(jb.bb.db, jb.bb.path, key, obj)
 }
 
 func (jb *JsonBucketeer) Get(key []byte, obj interface{}) (err error) {
-	return GetJsonValue(jb.db, jb.path, key, obj)
+	return GetJsonValue(jb.bb.db, jb.bb.path, key, obj)
 }
 
 func (jb *JsonBucketeer) PutNested(bucket []byte, key []byte, obj interface{}) error {
-	return PutJsonValue(jb.db, jb.path.Nest(bucket), key, obj)
+	return PutJsonValue(jb.bb.db, jb.bb.path.Nest(bucket), key, obj)
 }
 
 func (jb *JsonBucketeer) GetNested(bucket []byte, key []byte, obj interface{}) error {
-	return GetJsonValue(jb.db, jb.path.Nest(bucket), key, obj)
+	return GetJsonValue(jb.bb.db, jb.bb.path.Nest(bucket), key, obj)
 }
 
 func PutJsonValue(db *bolt.DB, path Path, key []byte, obj interface{}) (err error) {
