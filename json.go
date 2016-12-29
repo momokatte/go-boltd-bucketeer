@@ -27,6 +27,11 @@ func (jb *JsonBucketeer) EnsurePathBuckets() (err error) {
 	return
 }
 
+func (jb *JsonBucketeer) EnsureNestedBucket(bucket []byte) (err error) {
+	err = EnsureNestedBucket(jb.db, jb.path, bucket)
+	return
+}
+
 func (jb *JsonBucketeer) Put(key []byte, obj interface{}) (err error) {
 	return PutJsonValue(jb.db, jb.path, key, obj)
 }

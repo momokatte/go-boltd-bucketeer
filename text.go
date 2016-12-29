@@ -27,6 +27,11 @@ func (tb *TextBucketeer) EnsurePathBuckets() (err error) {
 	return
 }
 
+func (tb *TextBucketeer) EnsureNestedBucket(bucket []byte) (err error) {
+	err = EnsureNestedBucket(tb.db, tb.path, bucket)
+	return
+}
+
 func (tb *TextBucketeer) Put(key []byte, obj encoding.TextMarshaler) (err error) {
 	return PutTextValue(tb.db, tb.path, key, obj)
 }
