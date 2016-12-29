@@ -8,7 +8,14 @@ The Bucketeer types in this package wrap an already-open *bolt.DB instance to pr
 This package also provides all of its functionality via stand-alone methods which take *bolt.DB or *bolt.Tx arguments.
 
 
-# Usage
+## Status
+
+Current master branch should be considered a "release candidate" with interfaces and type signatures subject to change.
+
+I will tag a 1.0 release when I am satisfied with usability and test coverage.
+
+
+## Usage
 
 Basic use case with a single nested bucket:
 
