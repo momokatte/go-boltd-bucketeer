@@ -34,14 +34,14 @@ func EnsurePathBuckets(db *bolt.DB, path Path) (err error) {
 /*
 EnsureNestedBucket creates a nested bucket if it does not exist. The bucket's full parent path must exist.
 */
-func EnsureNestedBucket(db *bolt.DB, path Path, bucket []byte) (err error) {
+func EnsureNestedBucket(db *bolt.DB, path Path, bucket string) (err error) {
 	txf := func(tx *bolt.Tx) (err error) {
 		var b *bolt.Bucket
 		if b = GetBucket(tx, path); b == nil {
 			err = fmt.Errorf("Did not find one or more path buckets: %s", path.String())
 			return
 		}
-		_, err = b.CreateBucketIfNotExists(bucket)
+		_, err = b.CreateBucketIfNotExists([]byte(bucket))
 		return
 	}
 	err = db.Update(txf)
@@ -49,7 +49,7 @@ func EnsureNestedBucket(db *bolt.DB, path Path, bucket []byte) (err error) {
 }
 
 /*
-GetBucket retrieves the last bucket of the provided path for use within a transaction. The bucket's full parent path must exist.
+GetBucket retrieves the last (innermost) bucket of the provided path for use within a transaction. The bucket's full parent path must exist.
 */
 func GetBucket(tx *bolt.Tx, path Path) (b *bolt.Bucket) {
 	if len(path) == 0 {
@@ -64,5 +64,19 @@ func GetBucket(tx *bolt.Tx, path Path) (b *bolt.Bucket) {
 			return
 		}
 	}
+	return
+}
+
+/*
+DeleteNestedBucket deletes the nested bucket. The bucket's full parent path must exist.
+*/
+func DeleteNestedBucket(db *bolt.DB, path Path, bucket string) (err error) {
+	txf := func(tx *bolt.Tx) (err error) {
+		if b := GetBucket(tx, path); b != nil {
+			err = b.DeleteBucket([]byte(bucket))
+		}
+		return
+	}
+	err = db.Update(txf)
 	return
 }

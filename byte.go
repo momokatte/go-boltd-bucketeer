@@ -24,7 +24,7 @@ func (bb *ByteBucketeer) EnsurePathBuckets() (err error) {
 	return
 }
 
-func (bb *ByteBucketeer) EnsureNestedBucket(bucket []byte) (err error) {
+func (bb *ByteBucketeer) EnsureNestedBucket(bucket string) (err error) {
 	err = EnsureNestedBucket(bb.db, bb.path, bucket)
 	return
 }
@@ -37,12 +37,20 @@ func (bb *ByteBucketeer) Get(key []byte) ([]byte, error) {
 	return GetByteValue(bb.db, bb.path, key)
 }
 
-func (bb *ByteBucketeer) PutNested(bucket []byte, key []byte, value []byte) error {
+func (bb *ByteBucketeer) Delete(key []byte) error {
+	return DeleteKey(bb.db, bb.path, key)
+}
+
+func (bb *ByteBucketeer) PutNested(bucket string, key []byte, value []byte) error {
 	return PutByteValue(bb.db, bb.path.Nest(bucket), key, value)
 }
 
-func (bb *ByteBucketeer) GetNested(bucket []byte, key []byte) ([]byte, error) {
+func (bb *ByteBucketeer) GetNested(bucket string, key []byte) ([]byte, error) {
 	return GetByteValue(bb.db, bb.path.Nest(bucket), key)
+}
+
+func (bb *ByteBucketeer) DeleteNested(bucket string, key []byte) error {
+	return DeleteKey(bb.db, bb.path.Nest(bucket), key)
 }
 
 func PutByteValue(db *bolt.DB, path Path, key []byte, value []byte) (err error) {
@@ -59,6 +67,9 @@ func PutByteValue(db *bolt.DB, path Path, key []byte, value []byte) (err error) 
 	return
 }
 
+/*
+GetByteValue gets the key's value as a byte slice.
+*/
 func GetByteValue(db *bolt.DB, path Path, key []byte) (valueCopy []byte, err error) {
 	txf := func(tx *bolt.Tx) error {
 		if value := GetValueInTx(tx, path, key); value != nil {
@@ -75,5 +86,16 @@ func GetValueInTx(tx *bolt.Tx, path Path, key []byte) (value []byte) {
 	if b := GetBucket(tx, path); b != nil {
 		value = b.Get(key)
 	}
+	return
+}
+
+func DeleteKey(db *bolt.DB, path Path, key []byte) (err error) {
+	txf := func(tx *bolt.Tx) (err error) {
+		if b := GetBucket(tx, path); b != nil {
+			err = b.Delete(key)
+		}
+		return
+	}
+	err = db.Update(txf)
 	return
 }
