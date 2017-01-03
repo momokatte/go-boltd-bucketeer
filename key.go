@@ -57,6 +57,14 @@ func (kf *Keyfarer) PutJsonValue(valueObj interface{}) error {
 	return PutJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
+func (kf *Keyfarer) PutVarintValue(value int64) error {
+	return PutVarintValue(kf.bb.db, kf.bb.path, kf.key, value)
+}
+
+func (kf *Keyfarer) PutUvarintValue(value uint64) error {
+	return PutUvarintValue(kf.bb.db, kf.bb.path, kf.key, value)
+}
+
 /*
 GetByteValue gets the key's value as a byte slice.
 */
@@ -95,6 +103,14 @@ UnmarshalJsonValue gets the key's value and unmarshals it into the provided obje
 */
 func (kf *Keyfarer) UnmarshalJsonValue(valueObj interface{}) error {
 	return UnmarshalJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+}
+
+func (kf *Keyfarer) GetVarintValue() (int64, error) {
+	return GetVarintValue(kf.bb.db, kf.bb.path, kf.key)
+}
+
+func (kf *Keyfarer) GetUvarintValue() (uint64, error) {
+	return GetUvarintValue(kf.bb.db, kf.bb.path, kf.key)
 }
 
 /*
