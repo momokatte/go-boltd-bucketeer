@@ -7,16 +7,16 @@ import (
 )
 
 /*
-KeyActor encapsulates the components needed to resolve a key in BoltDB and provides convenience methods for setting and retrieving the value
+Keyfarer encapsulates the components needed to resolve a key in BoltDB and provides convenience methods for setting and retrieving the value
 */
-type KeyActor struct {
-	pa  *PathActor
+type Keyfarer struct {
+	bb  *Bucketeer
 	key []byte
 }
 
-func NewKeyActor(pa *PathActor, key []byte) (ka *KeyActor) {
-	ka = &KeyActor{
-		pa:  pa,
+func NewKeyfarer(bb *Bucketeer, key []byte) (kf *Keyfarer) {
+	kf = &Keyfarer{
+		bb:  bb,
 		key: key,
 	}
 	return
@@ -25,51 +25,51 @@ func NewKeyActor(pa *PathActor, key []byte) (ka *KeyActor) {
 /*
 PutByteValue sets the value for the key.
 */
-func (ka *KeyActor) PutByteValue(value []byte) error {
-	return PutByteValue(ka.pa.db, ka.pa.path, ka.key, value)
+func (kf *Keyfarer) PutByteValue(value []byte) error {
+	return PutByteValue(kf.bb.db, kf.bb.path, kf.key, value)
 }
 
 /*
 PutByteValue sets the value for the key.
 */
-func (ka *KeyActor) PutStringValue(value string) (err error) {
-	return PutByteValue(ka.pa.db, ka.pa.path, ka.key, []byte(value))
+func (kf *Keyfarer) PutStringValue(value string) (err error) {
+	return PutByteValue(kf.bb.db, kf.bb.path, kf.key, []byte(value))
 }
 
 /*
 PutTextValue marshals the provided object into its textual form and sets it as the value for the key.
 */
-func (ka *KeyActor) PutTextValue(valueObj encoding.TextMarshaler) (err error) {
-	return PutTextValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) PutTextValue(valueObj encoding.TextMarshaler) (err error) {
+	return PutTextValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 PutBinaryValue marshals the provided object into its binary form and sets it as the value for the key.
 */
-func (ka *KeyActor) PutBinaryValue(valueObj encoding.BinaryMarshaler) error {
-	return PutBinaryValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) PutBinaryValue(valueObj encoding.BinaryMarshaler) error {
+	return PutBinaryValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 PutJsonValue marshals the provided object into its JSON form and sets it as the value for the key.
 */
-func (ka *KeyActor) PutJsonValue(valueObj interface{}) error {
-	return PutJsonValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) PutJsonValue(valueObj interface{}) error {
+	return PutJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 GetByteValue gets the key's value as a byte slice.
 */
-func (ka *KeyActor) GetByteValue() ([]byte, error) {
-	return GetByteValue(ka.pa.db, ka.pa.path, ka.key)
+func (kf *Keyfarer) GetByteValue() ([]byte, error) {
+	return GetByteValue(kf.bb.db, kf.bb.path, kf.key)
 }
 
 /*
 GetStringValue gets the key's value as a string.
 */
-func (ka *KeyActor) GetStringValue() (value string, err error) {
+func (kf *Keyfarer) GetStringValue() (value string, err error) {
 	var v []byte
-	if v, err = ka.GetByteValue(); err != nil {
+	if v, err = kf.GetByteValue(); err != nil {
 		return
 	}
 	value = string(v)
@@ -79,29 +79,29 @@ func (ka *KeyActor) GetStringValue() (value string, err error) {
 /*
 UnmarshalTextValue gets the key's value and unmarshals it into the provided object.
 */
-func (ka *KeyActor) UnmarshalTextValue(valueObj encoding.TextUnmarshaler) error {
-	return UnmarshalTextValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) UnmarshalTextValue(valueObj encoding.TextUnmarshaler) error {
+	return UnmarshalTextValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 UnmarshalBinaryValue gets the key's value and unmarshals it into the provided object.
 */
-func (ka *KeyActor) UnmarshalBinaryValue(valueObj encoding.BinaryUnmarshaler) error {
-	return UnmarshalBinaryValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) UnmarshalBinaryValue(valueObj encoding.BinaryUnmarshaler) error {
+	return UnmarshalBinaryValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 UnmarshalJsonValue gets the key's value and unmarshals it into the provided object.
 */
-func (ka *KeyActor) UnmarshalJsonValue(valueObj interface{}) error {
-	return UnmarshalJsonValue(ka.pa.db, ka.pa.path, ka.key, valueObj)
+func (kf *Keyfarer) UnmarshalJsonValue(valueObj interface{}) error {
+	return UnmarshalJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
 }
 
 /*
 ViewValue gets the key's value and passes it to the provided function for arbitrary use. The byte slice is only valid within the scope of the function.
 */
-func (ka *KeyActor) ViewValue(viewFunc func(value []byte) error) error {
-	return ViewValue(ka.pa.db, ka.pa.path, ka.key, viewFunc)
+func (kf *Keyfarer) ViewValue(viewFunc func(value []byte) error) error {
+	return ViewValue(kf.bb.db, kf.bb.path, kf.key, viewFunc)
 }
 
 /*

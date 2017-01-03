@@ -1,11 +1,11 @@
 
 # go-boltd-bucketeer
 
-A Go package for streamlining use of buckets and encoded values in BoltDB.
+A Go package for streamlining use of buckets and encoded values in [Bolt](https://github.com/boltdb/bolt).
 
-The Actor types in this package wrap an already-open *bolt.DB instance to provide their convenience methods. Thus, you can create a PathActor instance for every bucket path you want to access, and their transactions will be thread-safe and share the single DB write lock.
+The Bucketeer type wraps an already-open *bolt.DB instance to provide its convenience methods. Thus, you can create Bucketeer instances for every bucket path you want to access, and their transactions will be thread-safe and share the single DB write lock.
 
-This package also provides most of its functionality via stand-alone methods which take *bolt.DB or *bolt.Tx arguments.
+This package also provides most of its functionality via stand-alone methods which take *bolt.DB arguments.
 
 
 ## Status
@@ -22,8 +22,7 @@ Basic use case with a single nested bucket:
 	var db *bolt.DB
 	// ... open DB ...
 	// we'll specify a path with a "bucket1" bucket nested in a "Misc" root bucket
-	bucket1Path := bucketeer.NewPath("Misc", "bucket1")
-	bucket1 := bucketeer.NewPathActor(db, bucket1Path)
+	bucket1 := bucketeer.New(db, "Misc", "bucket1")
 	// create the path buckets in the DB if they don't exist
 	bucket1.EnsurePathBuckets()
 	// store some key-value pairs in the "bucket1" bucket
@@ -32,6 +31,15 @@ Basic use case with a single nested bucket:
 	bucket1.ForStringKey("key3").PutStringValue("value3")
 	// retrieve a value
 	value2, _ := bucket1.ForStringKey("key2").GetStringValue()
+
+
+## TODO
+
+[Cursor](https://godoc.org/github.com/boltdb/bolt#Bucket.Cursor) functionality will be useful, but lacking generics it will be difficult to iterate arbitrary key-value type combinations.
+
+[Sequence](https://godoc.org/github.com/boltdb/bolt#Bucket.NextSequence) support might be desirable, but doesn't fit with the Bucketeer/Keyfarer model.
+
+[Stats](https://godoc.org/github.com/boltdb/bolt#Bucket.Stats) - sure, why not?
 
 
 ## Online GoDoc
