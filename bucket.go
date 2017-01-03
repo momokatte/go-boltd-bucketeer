@@ -3,6 +3,7 @@ package bucketeer
 import (
 	"encoding"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/boltdb/bolt"
@@ -64,6 +65,13 @@ DeleteNestedBucket deletes a nested bucket with the provided name.
 */
 func (bb *Bucketeer) DeleteNestedBucket(bucket string) error {
 	return DeleteNestedBucket(bb.db, bb.path, bucket)
+}
+
+/*
+GetBucketStats retrieves the BucketStats for the current bucket.
+*/
+func (bb *Bucketeer) GetBucketStats() (bolt.BucketStats, error) {
+	return GetBucketStats(bb.db, bb.path)
 }
 
 /*
@@ -188,6 +196,19 @@ func GetBucket(tx *bolt.Tx, path Path) (b *bolt.Bucket) {
 			return
 		}
 	}
+	return
+}
+
+func GetBucketStats(db *bolt.DB, path Path) (stats bolt.BucketStats, err error) {
+	txf := func(tx *bolt.Tx) (err error) {
+		if b := GetBucket(tx, path); b != nil {
+			stats = b.Stats()
+		} else {
+			err = errors.New("Error retrieving bucket")
+		}
+		return
+	}
+	err = db.View(txf)
 	return
 }
 

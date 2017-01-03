@@ -39,8 +39,6 @@ Basic use case with a single nested bucket:
 
 [Sequence](https://godoc.org/github.com/boltdb/bolt#Bucket.NextSequence) support might be desirable, but doesn't fit with the Bucketeer/Keyfarer model.
 
-[Stats](https://godoc.org/github.com/boltdb/bolt#Bucket.Stats) - sure, why not?
-
 
 ## Online GoDoc
 
