@@ -1,5 +1,5 @@
 
-# go-boltd-bucketeer
+# go-boltdb-bucketeer
 
 A Go package for streamlining use of buckets and encoded values in [Bolt](https://github.com/boltdb/bolt).
 
