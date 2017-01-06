@@ -46,7 +46,10 @@ type TextKey struct {
 }
 
 func (k TextKey) KeyBytes() (b []byte) {
-	b, _ = k.MarshalText()
+	var err error
+	if b, err = k.MarshalText(); err != nil {
+		panic(err.Error())
+	}
 	return
 }
 
@@ -55,7 +58,10 @@ type BinaryKey struct {
 }
 
 func (k BinaryKey) KeyBytes() (b []byte) {
-	b, _ = k.MarshalBinary()
+	var err error
+	if b, err = k.MarshalBinary(); err != nil {
+		panic(err.Error())
+	}
 	return
 }
 
@@ -63,7 +69,10 @@ type JsonKey struct {
 }
 
 func (k JsonKey) KeyBytes() (b []byte) {
-	b, _ = json.Marshal(k)
+	var err error
+	if b, err = json.Marshal(k); err != nil {
+		panic(err.Error())
+	}
 	return
 }
 
