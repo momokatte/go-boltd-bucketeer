@@ -14,17 +14,29 @@ type Key interface {
 
 type ByteKey []byte
 
+func NewByteKey(key []byte) ByteKey {
+	return ByteKey(key)
+}
+
 func (k ByteKey) KeyBytes() []byte {
 	return k
 }
 
 type StringKey string
 
+func NewStringKey(key string) StringKey {
+	return StringKey(key)
+}
+
 func (k StringKey) KeyBytes() []byte {
 	return []byte(k)
 }
 
 type Uint64Key uint64
+
+func NewUint64Key(key uint64) Uint64Key {
+	return Uint64Key(key)
+}
 
 func (k Uint64Key) KeyBytes() (b []byte) {
 	b = make([]byte, 8)
@@ -33,6 +45,10 @@ func (k Uint64Key) KeyBytes() (b []byte) {
 }
 
 type Int64Key int64
+
+func NewInt64Key(key int64) Int64Key {
+	return Int64Key(key)
+}
 
 func (k Int64Key) KeyBytes() (b []byte) {
 	b = make([]byte, 8)
@@ -43,6 +59,10 @@ func (k Int64Key) KeyBytes() (b []byte) {
 
 type TextKey struct {
 	encoding.TextMarshaler
+}
+
+func NewTextKey(keyObj encoding.TextMarshaler) *TextKey {
+	return &TextKey{keyObj}
 }
 
 func (k TextKey) KeyBytes() (b []byte) {
@@ -57,6 +77,10 @@ type BinaryKey struct {
 	encoding.BinaryMarshaler
 }
 
+func NewBinaryKey(keyObj encoding.BinaryMarshaler) *BinaryKey {
+	return &BinaryKey{keyObj}
+}
+
 func (k BinaryKey) KeyBytes() (b []byte) {
 	var err error
 	if b, err = k.MarshalBinary(); err != nil {
@@ -66,11 +90,16 @@ func (k BinaryKey) KeyBytes() (b []byte) {
 }
 
 type JsonKey struct {
+	keyObj interface{}
+}
+
+func NewJsonKey(keyObj interface{}) *JsonKey {
+	return &JsonKey{keyObj}
 }
 
 func (k JsonKey) KeyBytes() (b []byte) {
 	var err error
-	if b, err = json.Marshal(k); err != nil {
+	if b, err = json.Marshal(k.keyObj); err != nil {
 		panic(err.Error())
 	}
 	return
