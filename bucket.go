@@ -2,6 +2,7 @@ package bucketeer
 
 import (
 	"encoding"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -100,6 +101,23 @@ ForStringKey creates a new Keyfarer for the provided key name.
 */
 func (bb *Bucketeer) ForStringKey(key string) *Keyfarer {
 	return NewKeyfarer(bb, []byte(key))
+}
+
+/*
+ForUint64Key creates a new Keyfarer for the provided key name. The key value is stored in big-endian, fixed-length format so it is byte-sortable with other uint64 keys.
+*/
+func (bb *Bucketeer) ForUint64Key(key uint64) *Keyfarer {
+	k := make([]byte, 8)
+	binary.BigEndian.PutUint64(k, key)
+	return NewKeyfarer(bb, k)
+}
+
+/*
+ForInt64Key creates a new Keyfarer for the provided key name. The key value is shifted to always be a positive number, and is stored in big-endian, fixed-length format so it is byte-sortable with other int64 keys.
+*/
+func (bb *Bucketeer) ForInt64Key(key int64) *Keyfarer {
+	k := uint64(1<<63) ^ uint64(key)
+	return bb.ForUint64Key(k)
 }
 
 /*
