@@ -2,8 +2,6 @@ package bucketeer
 
 import (
 	"encoding"
-	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -90,70 +88,59 @@ func (bb *Bucketeer) UpdateBucket(updateFunc func(b *bolt.Bucket) error) error {
 }
 
 /*
+ForByteKey creates a new Keyfarer for the provided key.
+*/
+func (bb *Bucketeer) ForKey(key Key) *Keyfarer {
+	return NewKeyfarer(bb, key.KeyBytes())
+}
+
+/*
 ForByteKey creates a new Keyfarer for the provided key name.
 */
 func (bb *Bucketeer) ForByteKey(key []byte) *Keyfarer {
-	return NewKeyfarer(bb, key)
+	return bb.ForKey(ByteKey(key))
 }
 
 /*
 ForStringKey creates a new Keyfarer for the provided key name.
 */
 func (bb *Bucketeer) ForStringKey(key string) *Keyfarer {
-	return NewKeyfarer(bb, []byte(key))
+	return bb.ForKey(StringKey(key))
 }
 
 /*
 ForUint64Key creates a new Keyfarer for the provided key name. The key value is stored in big-endian, fixed-length format so it is byte-sortable with other uint64 keys.
 */
 func (bb *Bucketeer) ForUint64Key(key uint64) *Keyfarer {
-	k := make([]byte, 8)
-	binary.BigEndian.PutUint64(k, key)
-	return NewKeyfarer(bb, k)
+	return bb.ForKey(Uint64Key(key))
 }
 
 /*
 ForInt64Key creates a new Keyfarer for the provided key name. The key value is shifted to always be a positive number, and is stored in big-endian, fixed-length format so it is byte-sortable with other int64 keys.
 */
 func (bb *Bucketeer) ForInt64Key(key int64) *Keyfarer {
-	k := uint64(1<<63) ^ uint64(key)
-	return bb.ForUint64Key(k)
+	return bb.ForKey(Int64Key(key))
 }
 
 /*
 ForTextKey creates a new Keyfarer for the textual form of the provided object. If there is an error marshaling the object to text, this function will panic.
 */
 func (bb *Bucketeer) ForTextKey(keyObj encoding.TextMarshaler) *Keyfarer {
-	var key []byte
-	var err error
-	if key, err = keyObj.MarshalText(); err != nil {
-		panic(err.Error())
-	}
-	return NewKeyfarer(bb, key)
+	return bb.ForKey(TextKey{keyObj})
 }
 
 /*
 ForBinaryKey creates a new Keyfarer for the binary form of the provided object. If there is an error marshaling the object to binary, this function will panic.
 */
 func (bb *Bucketeer) ForBinaryKey(keyObj encoding.BinaryMarshaler) *Keyfarer {
-	var key []byte
-	var err error
-	if key, err = keyObj.MarshalBinary(); err != nil {
-		panic(err.Error())
-	}
-	return NewKeyfarer(bb, key)
+	return bb.ForKey(BinaryKey{keyObj})
 }
 
 /*
 ForJsonKey creates a new Keyfarer for the JSON form of the provided object. If there is an error marshaling the object to JSON, this function will panic.
 */
 func (bb *Bucketeer) ForJsonKey(keyObj interface{}) *Keyfarer {
-	var key []byte
-	var err error
-	if key, err = json.Marshal(keyObj); err != nil {
-		panic(err.Error())
-	}
-	return NewKeyfarer(bb, key)
+	return bb.ForKey(keyObj.(JsonKey))
 }
 
 /*

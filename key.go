@@ -2,9 +2,70 @@ package bucketeer
 
 import (
 	"encoding"
+	"encoding/binary"
+	"encoding/json"
 
 	"github.com/boltdb/bolt"
 )
+
+type Key interface {
+	KeyBytes() []byte
+}
+
+type ByteKey []byte
+
+func (k ByteKey) KeyBytes() []byte {
+	return k
+}
+
+type StringKey string
+
+func (k StringKey) KeyBytes() []byte {
+	return []byte(k)
+}
+
+type Uint64Key uint64
+
+func (k Uint64Key) KeyBytes() (b []byte) {
+	b = make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(k))
+	return
+}
+
+type Int64Key int64
+
+func (k Int64Key) KeyBytes() (b []byte) {
+	b = make([]byte, 8)
+	k2 := uint64(1<<63) ^ uint64(k)
+	binary.BigEndian.PutUint64(b, k2)
+	return
+}
+
+type TextKey struct {
+	encoding.TextMarshaler
+}
+
+func (k TextKey) KeyBytes() (b []byte) {
+	b, _ = k.MarshalText()
+	return
+}
+
+type BinaryKey struct {
+	encoding.BinaryMarshaler
+}
+
+func (k BinaryKey) KeyBytes() (b []byte) {
+	b, _ = k.MarshalBinary()
+	return
+}
+
+type JsonKey struct {
+}
+
+func (k JsonKey) KeyBytes() (b []byte) {
+	b, _ = json.Marshal(k)
+	return
+}
 
 /*
 Keyfarer encapsulates the components needed to resolve a key in BoltDB and provides convenience methods for setting and retrieving the value
