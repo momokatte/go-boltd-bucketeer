@@ -95,6 +95,21 @@ func (bb *Bucketeer) Update(updateFunc func(b *bolt.Bucket) error) error {
 }
 
 /*
+UpdateWithSequence executes the provided function in an Update transaction, and supplies the next sequence value for the bucket.
+*/
+func (bb *Bucketeer) UpdateWithSequence(updateFunc func(b *bolt.Bucket, sequence uint64) error) (sequence uint64, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		if sequence, err = b.NextSequence(); err != nil {
+			return
+		}
+		err = updateFunc(b, sequence)
+		return
+	}
+	err = bb.Update(bf)
+	return
+}
+
+/*
 ForByteKey creates a new Keyfarer for the provided key.
 */
 func (bb *Bucketeer) ForKey(key Key) *Keyfarer {

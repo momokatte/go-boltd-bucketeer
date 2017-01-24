@@ -37,8 +37,6 @@ Basic use case with a single nested bucket:
 
 [Cursor](https://godoc.org/github.com/boltdb/bolt#Bucket.Cursor) functionality will be useful, but lacking generics it will be difficult to iterate arbitrary key-value type combinations.
 
-[Sequence](https://godoc.org/github.com/boltdb/bolt#Bucket.NextSequence) support might be desirable, but doesn't fit with the Bucketeer/Keyfarer model.
-
 
 ## Online GoDoc
 
