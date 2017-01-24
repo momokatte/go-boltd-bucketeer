@@ -50,6 +50,19 @@ func GetInt64Value(b *bolt.Bucket, key []byte) (value int64, err error) {
 }
 
 /*
+IncrementInt64Value increments the key's value by the provided value, and returns the updated value.
+*/
+func IncrementInt64Value(b *bolt.Bucket, key []byte, value int64) (newValue int64, err error) {
+	var oldValue int64
+	if oldValue, err = GetInt64Value(b, key); err != nil {
+		return
+	}
+	newValue = oldValue + value
+	err = PutInt64Value(b, key, newValue)
+	return
+}
+
+/*
 PutUint64Value encodes the provided uint64 into big-endian bytes and sets that as the value for the key.
 */
 func PutUint64Value(b *bolt.Bucket, key []byte, value uint64) (err error) {
@@ -69,6 +82,19 @@ func GetUint64Value(b *bolt.Bucket, key []byte) (value uint64, err error) {
 		return
 	}
 	value = binary.BigEndian.Uint64(v)
+	return
+}
+
+/*
+IncrementUint64Value increments the key's value by the provided value, and returns the updated value.
+*/
+func IncrementUint64Value(b *bolt.Bucket, key []byte, value uint64) (newValue uint64, err error) {
+	var oldValue uint64
+	if oldValue, err = GetUint64Value(b, key); err != nil {
+		return
+	}
+	newValue = oldValue + value
+	err = PutUint64Value(b, key, newValue)
 	return
 }
 
@@ -117,18 +143,5 @@ func GetUvarintValue(b *bolt.Bucket, key []byte) (value uint64, err error) {
 			err = errors.New("Value is not a uint64")
 		}
 	}
-	return
-}
-
-/*
-IncrementUvarintValue increments the key's value by the provided value, and returns the updated value.
-*/
-func IncrementUvarintValue(b *bolt.Bucket, key []byte, value uint64) (newValue uint64, err error) {
-	var oldValue uint64
-	if oldValue, err = GetUvarintValue(b, key); err != nil {
-		return
-	}
-	newValue = oldValue + value
-	err = PutUvarintValue(b, key, newValue)
 	return
 }

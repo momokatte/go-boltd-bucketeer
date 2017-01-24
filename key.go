@@ -259,9 +259,18 @@ func (kf *Keyfarer) GetUvarintValue() (value uint64, err error) {
 	return
 }
 
-func (kf *Keyfarer) IncrementUvarintValue(value uint64) (newValue uint64, err error) {
+func (kf *Keyfarer) IncrementInt64Value(value int64) (newValue int64, err error) {
 	bf := func(b *bolt.Bucket) (err error) {
-		newValue, err = IncrementUvarintValue(b, kf.key, value)
+		newValue, err = IncrementInt64Value(b, kf.key, value)
+		return
+	}
+	err = kf.bb.Update(bf)
+	return
+}
+
+func (kf *Keyfarer) IncrementUint64Value(value uint64) (newValue uint64, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		newValue, err = IncrementUint64Value(b, kf.key, value)
 		return
 	}
 	err = kf.bb.Update(bf)
