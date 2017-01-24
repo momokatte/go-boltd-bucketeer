@@ -9,25 +9,21 @@ import (
 /*
 PutTextValue marshals the provided object into its textual form and sets it as the value for the key.
 */
-func PutTextValue(db *bolt.DB, path Path, key []byte, valueObj encoding.TextMarshaler) (err error) {
+func PutTextValue(b *bolt.Bucket, key []byte, valueObj encoding.TextMarshaler) (err error) {
 	var value []byte
 	if value, err = valueObj.MarshalText(); err != nil {
 		return
 	}
-	err = PutByteValue(db, path, key, value)
+	err = b.Put(key, value)
 	return
 }
 
 /*
 UnmarshalTextValue gets the key's value and unmarshals it into the provided object.
 */
-func UnmarshalTextValue(db *bolt.DB, path Path, key []byte, valueObj encoding.TextUnmarshaler) (err error) {
-	txf := func(tx *bolt.Tx) (err error) {
-		if value := GetValueInTx(tx, path, key); value != nil {
-			err = valueObj.UnmarshalText(value)
-		}
-		return
+func UnmarshalTextValue(b *bolt.Bucket, key []byte, valueObj encoding.TextUnmarshaler) (err error) {
+	if value := b.Get(key); value != nil {
+		err = valueObj.UnmarshalText(value)
 	}
-	err = db.View(txf)
 	return
 }

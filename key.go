@@ -125,61 +125,89 @@ func NewKeyfarer(bb *Bucketeer, key []byte) (kf *Keyfarer) {
 PutByteValue sets the value for the key.
 */
 func (kf *Keyfarer) PutByteValue(value []byte) error {
-	return PutByteValue(kf.bb.db, kf.bb.path, kf.key, value)
+	bf := func(b *bolt.Bucket) error {
+		return b.Put(kf.key, value)
+	}
+	return kf.bb.Update(bf)
 }
 
 /*
 PutByteValue sets the value for the key.
 */
 func (kf *Keyfarer) PutStringValue(value string) (err error) {
-	return PutByteValue(kf.bb.db, kf.bb.path, kf.key, []byte(value))
+	bf := func(b *bolt.Bucket) error {
+		return b.Put(kf.key, []byte(value))
+	}
+	return kf.bb.Update(bf)
 }
 
 /*
 PutTextValue marshals the provided object into its textual form and sets it as the value for the key.
 */
 func (kf *Keyfarer) PutTextValue(valueObj encoding.TextMarshaler) (err error) {
-	return PutTextValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return PutTextValue(b, kf.key, valueObj)
+	}
+	return kf.bb.Update(bf)
 }
 
 /*
 PutBinaryValue marshals the provided object into its binary form and sets it as the value for the key.
 */
 func (kf *Keyfarer) PutBinaryValue(valueObj encoding.BinaryMarshaler) error {
-	return PutBinaryValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return PutBinaryValue(b, kf.key, valueObj)
+	}
+	return kf.bb.Update(bf)
 }
 
 /*
 PutJsonValue marshals the provided object into its JSON form and sets it as the value for the key.
 */
 func (kf *Keyfarer) PutJsonValue(valueObj interface{}) error {
-	return PutJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return PutJsonValue(b, kf.key, valueObj)
+	}
+	return kf.bb.Update(bf)
 }
 
 func (kf *Keyfarer) PutVarintValue(value int64) error {
-	return PutVarintValue(kf.bb.db, kf.bb.path, kf.key, value)
+	bf := func(b *bolt.Bucket) error {
+		return PutVarintValue(b, kf.key, value)
+	}
+	return kf.bb.Update(bf)
 }
 
 func (kf *Keyfarer) PutUvarintValue(value uint64) error {
-	return PutUvarintValue(kf.bb.db, kf.bb.path, kf.key, value)
+	bf := func(b *bolt.Bucket) error {
+		return PutUvarintValue(b, kf.key, value)
+	}
+	return kf.bb.Update(bf)
 }
 
 /*
 GetByteValue gets the key's value as a byte slice.
 */
-func (kf *Keyfarer) GetByteValue() ([]byte, error) {
-	return GetByteValue(kf.bb.db, kf.bb.path, kf.key)
+func (kf *Keyfarer) GetByteValue() (value []byte, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		value = GetByteValue(b, kf.key)
+		return
+	}
+	err = kf.bb.View(bf)
+	return
 }
 
 /*
 GetStringValue gets the key's value as a string.
 */
 func (kf *Keyfarer) GetStringValue() (value string, err error) {
-	var v []byte
-	if v, err = kf.GetByteValue(); err != nil {
+	bf := func(b *bolt.Bucket) (err error) {
+		if v := b.Get(kf.key); len(v) != 0 {
+			value = string(v)
+		}
 		return
 	}
-	value = string(v)
+	err = kf.bb.View(bf)
 	return
 }
 
@@ -187,29 +215,57 @@ func (kf *Keyfarer) GetStringValue() (value string, err error) {
 UnmarshalTextValue gets the key's value and unmarshals it into the provided object.
 */
 func (kf *Keyfarer) UnmarshalTextValue(valueObj encoding.TextUnmarshaler) error {
-	return UnmarshalTextValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return UnmarshalTextValue(b, kf.key, valueObj)
+	}
+	return kf.bb.View(bf)
 }
 
 /*
 UnmarshalBinaryValue gets the key's value and unmarshals it into the provided object.
 */
 func (kf *Keyfarer) UnmarshalBinaryValue(valueObj encoding.BinaryUnmarshaler) error {
-	return UnmarshalBinaryValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return UnmarshalBinaryValue(b, kf.key, valueObj)
+	}
+	return kf.bb.View(bf)
 }
 
 /*
 UnmarshalJsonValue gets the key's value and unmarshals it into the provided object.
 */
 func (kf *Keyfarer) UnmarshalJsonValue(valueObj interface{}) error {
-	return UnmarshalJsonValue(kf.bb.db, kf.bb.path, kf.key, valueObj)
+	bf := func(b *bolt.Bucket) error {
+		return UnmarshalJsonValue(b, kf.key, valueObj)
+	}
+	return kf.bb.View(bf)
 }
 
-func (kf *Keyfarer) GetVarintValue() (int64, error) {
-	return GetVarintValue(kf.bb.db, kf.bb.path, kf.key)
+func (kf *Keyfarer) GetVarintValue() (value int64, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		value, err = GetVarintValue(b, kf.key)
+		return
+	}
+	err = kf.bb.View(bf)
+	return
 }
 
-func (kf *Keyfarer) GetUvarintValue() (uint64, error) {
-	return GetUvarintValue(kf.bb.db, kf.bb.path, kf.key)
+func (kf *Keyfarer) GetUvarintValue() (value uint64, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		value, err = GetUvarintValue(b, kf.key)
+		return
+	}
+	err = kf.bb.View(bf)
+	return
+}
+
+func (kf *Keyfarer) IncrementUvarintValue(value uint64) (newValue uint64, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		newValue, err = IncrementUvarintValue(b, kf.key, value)
+		return
+	}
+	err = kf.bb.Update(bf)
+	return
 }
 
 /*

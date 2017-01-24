@@ -2,7 +2,6 @@ package bucketeer
 
 import (
 	"encoding"
-	"errors"
 	"fmt"
 
 	"github.com/boltdb/bolt"
@@ -63,28 +62,36 @@ func (bb *Bucketeer) InNestedBucket(bucket string) *Bucketeer {
 DeleteNestedBucket deletes a nested bucket with the provided name.
 */
 func (bb *Bucketeer) DeleteNestedBucket(bucket string) error {
-	return DeleteNestedBucket(bb.db, bb.path, bucket)
+	bf := func(b *bolt.Bucket) error {
+		return b.DeleteBucket([]byte(bucket))
+	}
+	return bb.Update(bf)
 }
 
 /*
 GetBucketStats retrieves the BucketStats for the current bucket.
 */
-func (bb *Bucketeer) GetBucketStats() (bolt.BucketStats, error) {
-	return GetBucketStats(bb.db, bb.path)
+func (bb *Bucketeer) GetBucketStats() (stats bolt.BucketStats, err error) {
+	bf := func(b *bolt.Bucket) (err error) {
+		stats = b.Stats()
+		return
+	}
+	err = bb.View(bf)
+	return
 }
 
 /*
-ViewBucket executes the provided function in a View transaction.
+View executes the provided function in a View transaction.
 */
-func (bb *Bucketeer) ViewBucket(viewFunc func(b *bolt.Bucket) error) error {
-	return ViewBucket(bb.db, bb.path, viewFunc)
+func (bb *Bucketeer) View(viewFunc func(b *bolt.Bucket) error) error {
+	return ViewInBucket(bb.db, bb.path, viewFunc)
 }
 
 /*
-UpdateBucket executes the provided function in an Update transaction.
+Update executes the provided function in an Update transaction.
 */
-func (bb *Bucketeer) UpdateBucket(updateFunc func(b *bolt.Bucket) error) error {
-	return UpdateBucket(bb.db, bb.path, updateFunc)
+func (bb *Bucketeer) Update(updateFunc func(b *bolt.Bucket) error) error {
+	return UpdateInBucket(bb.db, bb.path, updateFunc)
 }
 
 /*
@@ -204,37 +211,10 @@ func GetBucket(tx *bolt.Tx, path Path) (b *bolt.Bucket) {
 	return
 }
 
-func GetBucketStats(db *bolt.DB, path Path) (stats bolt.BucketStats, err error) {
-	txf := func(tx *bolt.Tx) (err error) {
-		if b := GetBucket(tx, path); b != nil {
-			stats = b.Stats()
-		} else {
-			err = errors.New("Error retrieving bucket")
-		}
-		return
-	}
-	err = db.View(txf)
-	return
-}
-
 /*
-DeleteNestedBucket deletes the nested bucket. The bucket's full parent path must exist.
+ViewInBucket executes the provided function in a View transaction.
 */
-func DeleteNestedBucket(db *bolt.DB, path Path, bucket string) (err error) {
-	txf := func(tx *bolt.Tx) (err error) {
-		if b := GetBucket(tx, path); b != nil {
-			err = b.DeleteBucket([]byte(bucket))
-		}
-		return
-	}
-	err = db.Update(txf)
-	return
-}
-
-/*
-ViewBucket executes the provided function in a View transaction.
-*/
-func ViewBucket(db *bolt.DB, path Path, viewFunc func(b *bolt.Bucket) error) (err error) {
+func ViewInBucket(db *bolt.DB, path Path, viewFunc func(b *bolt.Bucket) error) (err error) {
 	txf := func(tx *bolt.Tx) (err error) {
 		if b := GetBucket(tx, path); b != nil {
 			err = viewFunc(b)
@@ -246,9 +226,9 @@ func ViewBucket(db *bolt.DB, path Path, viewFunc func(b *bolt.Bucket) error) (er
 }
 
 /*
-UpdateBucket executes the provided function in an Update transaction.
+UpdateInBucket executes the provided function in an Update transaction.
 */
-func UpdateBucket(db *bolt.DB, path Path, updateFunc func(b *bolt.Bucket) error) (err error) {
+func UpdateInBucket(db *bolt.DB, path Path, updateFunc func(b *bolt.Bucket) error) (err error) {
 	txf := func(tx *bolt.Tx) (err error) {
 		if b := GetBucket(tx, path); b != nil {
 			err = updateFunc(b)
